@@ -4,9 +4,16 @@ class_name VegetationSystem
 
 @export_group("Vegetation Settings")
 @export var spawn_distance: float = 100.0
-@export var density: float = 0.3
-@export var min_scale: float = 0.8
-@export var max_scale: float = 1.5
+@export var tree_density: float = 0.1
+@export var bush_density: float = 0.3
+
+@export_group("Tree Settings")
+@export var tree_min_scale: float = 2.0
+@export var tree_max_scale: float = 4.0
+
+@export_group("Bush Settings")
+@export var bush_min_scale: float = 0.8
+@export var bush_max_scale: float = 1.5
 
 @export_group("Clustering")
 @export var use_clustering: bool = true
@@ -21,12 +28,15 @@ class_name VegetationSystem
 var spawned_vegetation: Dictionary = {}
 var preview_vegetation: Array = []
 var terrain_system: TerrainSystem
-var vegetation_material: StandardMaterial3D
+var tree_material: StandardMaterial3D
+var bush_material: StandardMaterial3D
 var update_timer: float = 0.0
 var update_frequency: float = 1.0
 
+enum VegetationType { TREE, BUSH }
+
 func _ready():
-	setup_material()
+	setup_materials()
 	terrain_system = get_parent().find_child("TerrainSystem")
 	
 	if Engine.is_editor_hint():
@@ -35,18 +45,30 @@ func _ready():
 	else:
 		set_process(true)
 
-func setup_material():
-	vegetation_material = StandardMaterial3D.new()
-	var texture = load("res://bush.tga")
-	if texture:
-		vegetation_material.albedo_texture = texture
+func setup_materials():
+	# Tree material
+	tree_material = StandardMaterial3D.new()
+	var tree_texture = load("res://tree.tga")
+	if tree_texture:
+		tree_material.albedo_texture = tree_texture
+	tree_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tree_material.roughness = 1.0
+	tree_material.metallic = 0.0
+	tree_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	tree_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	tree_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	
-	vegetation_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	vegetation_material.roughness = 1.0
-	vegetation_material.metallic = 0.0
-	vegetation_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	vegetation_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	vegetation_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	# Bush material
+	bush_material = StandardMaterial3D.new()
+	var bush_texture = load("res://bush.tga")
+	if bush_texture:
+		bush_material.albedo_texture = bush_texture
+	bush_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	bush_material.roughness = 1.0
+	bush_material.metallic = 0.0
+	bush_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	bush_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	bush_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 
 func _process(delta):
 	if Engine.is_editor_hint():
@@ -141,46 +163,85 @@ func spawn_clustered_vegetation(chunk_pos: Vector2, chunk_vegetation: Array, rng
 		var cluster_center_x = rng.randf_range(cluster_radius, chunk_size - cluster_radius)
 		var cluster_center_z = rng.randf_range(cluster_radius, chunk_size - cluster_radius)
 		
-		for veg_i in range(vegetation_per_cluster):
-			var mesh_instance = create_vegetation_instance(rng)
+		# Spawn trees (fewer, larger)
+		var tree_count = max(1, int(vegetation_per_cluster * tree_density))
+		for veg_i in range(tree_count):
+			var mesh_instance = create_vegetation_instance(VegetationType.TREE, rng)
 			
 			var distance_from_center = rng.randf_range(0, cluster_radius)
 			var angle = rng.randf_range(0, 2 * PI)
 			var veg_x = cluster_center_x + cos(angle) * distance_from_center
 			var veg_z = cluster_center_z + sin(angle) * distance_from_center
 			
-			position_vegetation(mesh_instance, chunk_pos, veg_x, veg_z, distance_from_center, rng)
+			position_vegetation(mesh_instance, chunk_pos, veg_x, veg_z, distance_from_center, rng, VegetationType.TREE)
+			
+			add_child(mesh_instance)
+			chunk_vegetation.append(mesh_instance)
+		
+		# Spawn bushes (more numerous, smaller)
+		var bush_count = max(1, int(vegetation_per_cluster * bush_density))
+		for veg_i in range(bush_count):
+			var mesh_instance = create_vegetation_instance(VegetationType.BUSH, rng)
+			
+			var distance_from_center = rng.randf_range(0, cluster_radius)
+			var angle = rng.randf_range(0, 2 * PI)
+			var veg_x = cluster_center_x + cos(angle) * distance_from_center
+			var veg_z = cluster_center_z + sin(angle) * distance_from_center
+			
+			position_vegetation(mesh_instance, chunk_pos, veg_x, veg_z, distance_from_center, rng, VegetationType.BUSH)
 			
 			add_child(mesh_instance)
 			chunk_vegetation.append(mesh_instance)
 
 func spawn_scattered_vegetation(chunk_pos: Vector2, chunk_vegetation: Array, rng: RandomNumberGenerator, is_preview: bool):
 	var chunk_size = terrain_system.chunk_size if terrain_system else 32
-	var vegetation_count = int(chunk_size * chunk_size * density / 100.0)
+	var tree_count = int(chunk_size * chunk_size * tree_density / 100.0)
+	var bush_count = int(chunk_size * chunk_size * bush_density / 100.0)
 	
-	for i in range(vegetation_count):
-		var mesh_instance = create_vegetation_instance(rng)
+	# Spawn trees
+	for i in range(tree_count):
+		var mesh_instance = create_vegetation_instance(VegetationType.TREE, rng)
 		
 		var veg_x = rng.randf_range(0, chunk_size)
 		var veg_z = rng.randf_range(0, chunk_size)
 		
-		position_vegetation(mesh_instance, chunk_pos, veg_x, veg_z, 0, rng)
+		position_vegetation(mesh_instance, chunk_pos, veg_x, veg_z, 0, rng, VegetationType.TREE)
+		
+		add_child(mesh_instance)
+		chunk_vegetation.append(mesh_instance)
+	
+	# Spawn bushes
+	for i in range(bush_count):
+		var mesh_instance = create_vegetation_instance(VegetationType.BUSH, rng)
+		
+		var veg_x = rng.randf_range(0, chunk_size)
+		var veg_z = rng.randf_range(0, chunk_size)
+		
+		position_vegetation(mesh_instance, chunk_pos, veg_x, veg_z, 0, rng, VegetationType.BUSH)
 		
 		add_child(mesh_instance)
 		chunk_vegetation.append(mesh_instance)
 
-func create_vegetation_instance(rng: RandomNumberGenerator) -> MeshInstance3D:
+func create_vegetation_instance(type: VegetationType, rng: RandomNumberGenerator) -> MeshInstance3D:
 	var mesh_instance = MeshInstance3D.new()
 	var quad_mesh = QuadMesh.new()
-	quad_mesh.size = Vector2(1.5, 1.2)
+	
+	match type:
+		VegetationType.TREE:
+			quad_mesh.size = Vector2(3.0, 4.0)
+			quad_mesh.center_offset = Vector3(0, quad_mesh.size.y * 0.5, 0)  # Pivot at bottom
+			mesh_instance.material_override = tree_material
+		VegetationType.BUSH:
+			quad_mesh.size = Vector2(1.5, 1.2)
+			quad_mesh.center_offset = Vector3(0, quad_mesh.size.y * 0.5, 0)  # Pivot at bottom
+			mesh_instance.material_override = bush_material
 	
 	mesh_instance.mesh = quad_mesh
-	mesh_instance.material_override = vegetation_material
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	
 	return mesh_instance
 
-func position_vegetation(mesh_instance: MeshInstance3D, chunk_pos: Vector2, local_x: float, local_z: float, distance_from_center: float, rng: RandomNumberGenerator):
+func position_vegetation(mesh_instance: MeshInstance3D, chunk_pos: Vector2, local_x: float, local_z: float, distance_from_center: float, rng: RandomNumberGenerator, type: VegetationType):
 	var chunk_size = terrain_system.chunk_size if terrain_system else 32
 	var world_x = chunk_pos.x * chunk_size + local_x
 	var world_z = chunk_pos.y * chunk_size + local_z
@@ -189,12 +250,22 @@ func position_vegetation(mesh_instance: MeshInstance3D, chunk_pos: Vector2, loca
 	if terrain_system:
 		height = terrain_system.get_height_at(world_x, world_z)
 	
-	var scale_factor = rng.randf_range(min_scale, max_scale)
+	var scale_factor: float
+	var height_offset: float
+	
+	match type:
+		VegetationType.TREE:
+			scale_factor = rng.randf_range(tree_min_scale, tree_max_scale)
+			height_offset = 0.1  # Small offset to avoid z-fighting with terrain
+		VegetationType.BUSH:
+			scale_factor = rng.randf_range(bush_min_scale, bush_max_scale)
+			height_offset = 0.05  # Very small offset for bushes
+	
 	if use_clustering:
-		scale_factor = lerp(max_scale, min_scale, distance_from_center / cluster_radius)
+		scale_factor = lerp(scale_factor, scale_factor * 0.7, distance_from_center / cluster_radius)
 		scale_factor *= rng.randf_range(0.8, 1.2)
 	
-	mesh_instance.position = Vector3(world_x, height + (scale_factor * 0.6), world_z)
+	mesh_instance.position = Vector3(world_x, height + height_offset, world_z)
 	mesh_instance.scale = Vector3(scale_factor, scale_factor, scale_factor)
 	mesh_instance.rotation_degrees.y = rng.randf_range(0, 360)
 

@@ -35,7 +35,9 @@ height_scale = 15.0
 
 [node name="VegetationSystem" type="Node3D" parent="."]
 script = ExtResource("4_vegetation")
-density = 0.4
+tree_density = 0.15
+bush_density = 0.4
+tree_min_scale = 2.5
 
 [node name="Environment" type="Node3D" parent="."]
 
