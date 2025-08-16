@@ -1,0 +1,17 @@
+fc8a56933c4b1c8d796fdb8f7a9f9475
+::res://::1755387583
+bush.tga::CompressedTexture2D::3951644764015070128::1755380419::1755387586::1::::<><><>0<>0<>1c39fe361d2d7380177abd531cea4956<>res://.godot/imported/bush.tga-a4e3dd18d20f5f0cfdc4d5c11a957bac.ctex::
+day.exr::CompressedTexture2D::4373606959225875430::1755380419::1755387622::1::::<><><>0<>0<>2626fa3de646c6429e1d8741633e239c<>res://.godot/imported/day.exr-225b317131f31ffe806db5d797ad1bd3.bptc.ctex<*>res://.godot/imported/day.exr-225b317131f31ffe806db5d797ad1bd3.astc.ctex::
+evening.exr::CompressedTexture2D::3316752255992983778::1755380419::1755387587::1::::<><><>0<>0<>de9dbb1ad8f9e0ab6e5de42018a2d19c<>res://.godot/imported/evening.exr-02c0e0d0343d9ef390ebe138e03f34bb.ctex::
+grass_checkered.tga::CompressedTexture2D::6276369427614235279::1755380419::1755387586::1::::<><><>0<>0<>738574efa5048a54d02bad5a9093ea01<>res://.godot/imported/grass_checkered.tga-3a0cab5b45d7ce1054135ec2ec1bafff.ctex::
+morning.exr::CompressedTexture2D::4635334313515695293::1755380419::1755387587::1::::<><><>0<>0<>64956451726b82b9ed8b9c4fbde4b14c<>res://.godot/imported/morning.exr-d3cdcb776ddbcc42985e49ff004b1b23.ctex::
+night.exr::CompressedTexture2D::8277640235090977994::1755380419::1755387588::1::::<><><>0<>0<>3c1ea152bcbb1263cdb6cf0426fa1678<>res://.godot/imported/night.exr-51765b5e72e31ce2b8fee230b873eacb.ctex::
+tree.tga::CompressedTexture2D::2878768688053367514::1755384907::1755387587::1::::<><><>0<>0<>bb19b2245f5365080b29b53abf25467a<>res://.godot/imported/tree.tga-24e181f91a3c5303faf99425c6a02fae.ctex::
+::res://scenes/::1755387366
+Main.tscn::PackedScene::4030653451339636046::1755387366::0::1::::<><><>0<>0<><>::res://scripts/FPSController.gd<>res://scripts/TouchControls.gd<>res://scripts/TerrainSystem.gd<>res://scripts/VegetationSystem.gd<>res://scripts/GameController.gd
+::res://scripts/::1755387351
+FPSController.gd::GDScript::7134631041057940590::1755387141::0::1::::FPSController<>CharacterBody3D<><>0<>0<><>::
+GameController.gd::GDScript::656543142620841645::1755387351::0::1::::GameController<>Node<><>0<>0<><>::
+TerrainSystem.gd::GDScript::5490663299058576288::1755387277::0::1::::TerrainSystem<>Node3D<><>0<>1<><>::
+TouchControls.gd::GDScript::488191147191720513::1755387173::0::1::::TouchControls<>CanvasLayer<><>0<>0<><>::
+VegetationSystem.gd::GDScript::2000447022028075411::1755387312::0::1::::VegetationSystem<>Node3D<><>0<>1<><>::

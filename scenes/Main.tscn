@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3 uid="uid://bxoqjkd8nwvxm"]
+
+[ext_resource type="Script" uid="uid://c8wcliqi6hjxu" path="res://scripts/FPSController.gd" id="1_fps"]
+[ext_resource type="Script" uid="uid://g7qo4axjml7f" path="res://scripts/TouchControls.gd" id="2_touch"]
+[ext_resource type="Script" uid="uid://ckhyomhvsnxcy" path="res://scripts/TerrainSystem.gd" id="3_terrain"]
+[ext_resource type="Script" uid="uid://3rbcnergj3kh" path="res://scripts/VegetationSystem.gd" id="4_vegetation"]
+[ext_resource type="Script" uid="uid://jmbf1dn1p1cj" path="res://scripts/GameController.gd" id="5_game"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.4
+height = 1.8
+
+[node name="Main" type="Node3D"]
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+script = ExtResource("1_fps")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="CameraPivot" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Player/CameraPivot"]
+far = 1000.0
+
+[node name="TouchControls" type="CanvasLayer" parent="."]
+script = ExtResource("2_touch")
+
+[node name="TerrainSystem" type="Node3D" parent="."]
+script = ExtResource("3_terrain")
+height_scale = 15.0
+
+[node name="VegetationSystem" type="Node3D" parent="."]
+script = ExtResource("4_vegetation")
+density = 0.4
+
+[node name="Environment" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment"]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 10, 0)
+shadow_enabled = true
+
+[node name="GameController" type="Node" parent="."]
+script = ExtResource("5_game")
