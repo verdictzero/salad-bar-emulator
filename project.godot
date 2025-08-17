@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Infinite Terrain"
+run/main_scene="res://scenes/Main.tscn"
 config/description="Mobile-optimized infinite terrain with vegetation"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.svg"

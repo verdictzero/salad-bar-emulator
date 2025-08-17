@@ -8,7 +8,7 @@ class_name TerrainSystem
 @export var max_lod_level: int = 3
 
 @export_group("Height Generation")
-@export var height_scale: float = 20.0
+@export var height_scale: float = 0.1
 @export var noise_scale: float = 0.01
 @export var octaves: int = 4
 @export var persistence: float = 0.5
@@ -52,8 +52,9 @@ func setup_material():
 	terrain_material.albedo_color = Color.WHITE
 	terrain_material.roughness = 0.8
 	terrain_material.metallic = 0.0
+	terrain_material.flags_unshaded = true
 	terrain_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	terrain_material.uv1_scale = Vector3(8.0, 8.0, 8.0)
+	terrain_material.uv1_scale = Vector3(16.0, 16.0, 16.0)
 	
 	var grass_texture = load("res://grass_checkered.tga")
 	if grass_texture:

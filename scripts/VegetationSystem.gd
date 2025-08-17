@@ -4,8 +4,8 @@ class_name VegetationSystem
 
 @export_group("Vegetation Settings")
 @export var spawn_distance: float = 100.0
-@export var tree_density: float = 0.1
-@export var bush_density: float = 0.3
+@export var tree_density: float = 0.2
+@export var bush_density: float = 0.6
 
 @export_group("Tree Settings")
 @export var tree_min_scale: float = 2.0
@@ -54,9 +54,12 @@ func setup_materials():
 	tree_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	tree_material.roughness = 1.0
 	tree_material.metallic = 0.0
-	tree_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	tree_material.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
 	tree_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	tree_material.flags_unshaded = true
 	tree_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	tree_material.no_depth_test = false
+	tree_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
 	
 	# Bush material
 	bush_material = StandardMaterial3D.new()
@@ -66,9 +69,12 @@ func setup_materials():
 	bush_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	bush_material.roughness = 1.0
 	bush_material.metallic = 0.0
-	bush_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	bush_material.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
 	bush_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	bush_material.flags_unshaded = true
 	bush_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	bush_material.no_depth_test = false
+	bush_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
 
 func _process(delta):
 	if Engine.is_editor_hint():
@@ -239,6 +245,13 @@ func create_vegetation_instance(type: VegetationType, rng: RandomNumberGenerator
 	mesh_instance.mesh = quad_mesh
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	
+	# Set sorting offset based on vegetation type for proper depth sorting
+	match type:
+		VegetationType.TREE:
+			mesh_instance.sorting_offset = 1.0  # Trees render behind bushes
+		VegetationType.BUSH:
+			mesh_instance.sorting_offset = 0.0  # Bushes render in front
+	
 	return mesh_instance
 
 func position_vegetation(mesh_instance: MeshInstance3D, chunk_pos: Vector2, local_x: float, local_z: float, distance_from_center: float, rng: RandomNumberGenerator, type: VegetationType):
@@ -256,10 +269,10 @@ func position_vegetation(mesh_instance: MeshInstance3D, chunk_pos: Vector2, loca
 	match type:
 		VegetationType.TREE:
 			scale_factor = rng.randf_range(tree_min_scale, tree_max_scale)
-			height_offset = 0.1  # Small offset to avoid z-fighting with terrain
+			height_offset = -0.1  # Sink slightly into terrain for better ground contact
 		VegetationType.BUSH:
 			scale_factor = rng.randf_range(bush_min_scale, bush_max_scale)
-			height_offset = 0.05  # Very small offset for bushes
+			height_offset = -0.05  # Sink slightly into terrain for better ground contact
 	
 	if use_clustering:
 		scale_factor = lerp(scale_factor, scale_factor * 0.7, distance_from_center / cluster_radius)
