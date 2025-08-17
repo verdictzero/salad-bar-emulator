@@ -12,12 +12,15 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed: float
 var mouse_captured: bool = false
 var t_bob: float = 0.0
+var total_distance: float = 0.0
+var last_position: Vector3
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 
 func _ready():
 	set_mouse_captured(true)
+	last_position = position
 
 func _input(event):
 	if event is InputEventMouseMotion and mouse_captured:
@@ -34,6 +37,7 @@ func _physics_process(delta):
 	handle_movement(delta)
 	handle_head_bob(delta)
 	move_and_slide()
+	update_distance()
 
 func handle_gravity(delta):
 	if not is_on_floor():
@@ -76,6 +80,14 @@ func handle_head_bob(delta):
 		sin(t_bob * bob_freq * 2) * bob_amp,
 		0
 	)
+
+func update_distance():
+	var distance_moved = position.distance_to(last_position)
+	total_distance += distance_moved
+	last_position = position
+
+func get_distance_travelled() -> float:
+	return total_distance
 
 func set_mouse_captured(captured: bool):
 	mouse_captured = captured

@@ -8,6 +8,11 @@ class_name TouchControls
 var left_joystick: Control
 var jump_button: Control
 var sprint_button: Control
+var distance_label: Label
+var debug_label: Label
+var player: FPSController
+var terrain_system: TerrainSystem
+var vegetation_system: VegetationSystem
 
 var joystick_center: Vector2
 var is_touching_joystick: bool = false
@@ -18,11 +23,66 @@ signal jump_pressed()
 signal sprint_pressed(pressed: bool)
 
 func _ready():
+	player = get_node("../Player") as FPSController
+	terrain_system = get_node("../TerrainSystem") as TerrainSystem
+	vegetation_system = get_node("../VegetationSystem") as VegetationSystem
+	create_distance_widget()
+	create_debug_widget()
+	
 	if not OS.has_feature("mobile"):
-		visible = false
+		# Hide mobile controls but keep distance widget
+		left_joystick = null
+		jump_button = null
+		sprint_button = null
 		return
 	
 	create_touch_controls()
+
+func _process(_delta):
+	if player and distance_label:
+		var distance = player.get_distance_travelled()
+		distance_label.text = "Distance: %.1fm" % distance
+	
+	update_debug_info()
+
+func create_distance_widget():
+	distance_label = Label.new()
+	distance_label.text = "Distance: 0.0m"
+	distance_label.position = Vector2(20, 20)
+	distance_label.add_theme_font_size_override("font_size", 24)
+	distance_label.add_theme_color_override("font_color", Color.WHITE)
+	distance_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	distance_label.add_theme_constant_override("outline_size", 2)
+	add_child(distance_label)
+
+func create_debug_widget():
+	debug_label = Label.new()
+	debug_label.text = "Debug Info"
+	debug_label.position = Vector2(20, 60)
+	debug_label.add_theme_font_size_override("font_size", 16)
+	debug_label.add_theme_color_override("font_color", Color.WHITE)
+	debug_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	debug_label.add_theme_constant_override("outline_size", 1)
+	add_child(debug_label)
+
+func update_debug_info():
+	if not terrain_system or not vegetation_system or not debug_label:
+		return
+	
+	var terrain_debug = terrain_system.get_debug_info()
+	var vegetation_debug = vegetation_system.get_debug_info()
+	
+	var debug_text = "TERRAIN:\n"
+	debug_text += "Chunks: %d\n" % terrain_debug.chunks_loaded
+	debug_text += "Player Chunk: %s\n" % str(terrain_debug.player_chunk)
+	debug_text += "Render Dist: %d\n" % terrain_debug.render_distance
+	debug_text += "\nVEGETATION:\n"
+	debug_text += "Total: %d\n" % vegetation_debug.total_vegetation
+	debug_text += "Trees: %d\n" % vegetation_debug.trees
+	debug_text += "Bushes: %d\n" % vegetation_debug.bushes
+	debug_text += "Veg Chunks: %d" % vegetation_debug.chunks_with_vegetation
+	
+	debug_label.text = debug_text
 
 func create_touch_controls():
 	left_joystick = create_joystick()
@@ -74,7 +134,7 @@ func create_button(text: String, pos: Vector2) -> Control:
 	return button
 
 func _input(event):
-	if not OS.has_feature("mobile"):
+	if not OS.has_feature("mobile") or not left_joystick:
 		return
 	
 	if event is InputEventScreenTouch:

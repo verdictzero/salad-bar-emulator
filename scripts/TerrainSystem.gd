@@ -4,7 +4,7 @@ class_name TerrainSystem
 
 @export_group("Terrain Settings")
 @export var chunk_size: int = 32
-@export var render_distance: int = 8
+@export var render_distance: int = 12
 @export var max_lod_level: int = 3
 
 @export_group("Height Generation")
@@ -26,7 +26,7 @@ var terrain_material: StandardMaterial3D
 var player_position: Vector3 = Vector3.ZERO
 var last_player_chunk: Vector2 = Vector2.INF
 var update_timer: float = 0.0
-var update_frequency: float = 0.5
+var update_frequency: float = 0.1
 
 func _ready():
 	setup_noise()
@@ -67,7 +67,7 @@ func _process(delta):
 	update_timer += delta
 	if update_timer >= update_frequency:
 		var current_chunk = world_to_chunk(player_position)
-		if current_chunk.distance_to(last_player_chunk) > 1:
+		if current_chunk.distance_to(last_player_chunk) > 0.5:
 			update_terrain()
 			last_player_chunk = current_chunk
 		update_timer = 0.0
@@ -156,10 +156,9 @@ func create_chunk(chunk_pos: Vector2):
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mesh_instance.visibility_range_end = 500.0
 	
-	if distance_to_player < 4:
-		var shape = mesh.create_trimesh_shape()
-		collision_shape.shape = shape
-		static_body.add_child(collision_shape)
+	var shape = mesh.create_trimesh_shape()
+	collision_shape.shape = shape
+	static_body.add_child(collision_shape)
 	
 	static_body.position = Vector3(chunk_pos.x * chunk_size, 0, chunk_pos.y * chunk_size)
 	static_body.add_child(mesh_instance)
@@ -242,3 +241,13 @@ func remove_chunk(chunk_key: String):
 
 func get_terrain_height_at_world_position(world_pos: Vector3) -> float:
 	return get_height_at(world_pos.x, world_pos.z)
+
+func get_debug_info() -> Dictionary:
+	return {
+		"chunks_loaded": chunks.size(),
+		"player_chunk": world_to_chunk(player_position),
+		"render_distance": render_distance,
+		"chunk_size": chunk_size,
+		"height_scale": height_scale,
+		"update_frequency": update_frequency
+	}

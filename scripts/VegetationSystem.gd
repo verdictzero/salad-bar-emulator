@@ -51,7 +51,7 @@ func setup_materials():
 	var tree_texture = load("res://tree.tga")
 	if tree_texture:
 		tree_material.albedo_texture = tree_texture
-	tree_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tree_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 	tree_material.roughness = 1.0
 	tree_material.metallic = 0.0
 	tree_material.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
@@ -66,7 +66,7 @@ func setup_materials():
 	var bush_texture = load("res://bush.tga")
 	if bush_texture:
 		bush_material.albedo_texture = bush_texture
-	bush_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	bush_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 	bush_material.roughness = 1.0
 	bush_material.metallic = 0.0
 	bush_material.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
@@ -288,3 +288,27 @@ func remove_vegetation_in_chunk(chunk_key: String):
 			if is_instance_valid(vegetation):
 				vegetation.queue_free()
 		spawned_vegetation.erase(chunk_key)
+
+func get_debug_info() -> Dictionary:
+	var total_vegetation = 0
+	var total_trees = 0
+	var total_bushes = 0
+	
+	for chunk_key in spawned_vegetation.keys():
+		var chunk_veg = spawned_vegetation[chunk_key]
+		total_vegetation += chunk_veg.size()
+		for veg in chunk_veg:
+			if is_instance_valid(veg) and veg.material_override == tree_material:
+				total_trees += 1
+			elif is_instance_valid(veg) and veg.material_override == bush_material:
+				total_bushes += 1
+	
+	return {
+		"chunks_with_vegetation": spawned_vegetation.size(),
+		"total_vegetation": total_vegetation,
+		"trees": total_trees,
+		"bushes": total_bushes,
+		"tree_density": tree_density,
+		"bush_density": bush_density,
+		"spawn_distance": spawn_distance
+	}
