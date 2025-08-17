@@ -14,6 +14,8 @@ var mouse_captured: bool = false
 var t_bob: float = 0.0
 var total_distance: float = 0.0
 var last_position: Vector3
+var debug_timer: float = 0.0
+var last_chunk_position: Vector2 = Vector2.INF
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/Camera3D
@@ -21,6 +23,7 @@ var last_position: Vector3
 func _ready():
 	set_mouse_captured(true)
 	last_position = position
+	DebugLogger.log_player("FPS Controller initialized at position: %s" % str(global_position))
 
 func _input(event):
 	if event is InputEventMouseMotion and mouse_captured:
@@ -38,6 +41,8 @@ func _physics_process(delta):
 	handle_head_bob(delta)
 	move_and_slide()
 	update_distance()
+	update_terrain_system()
+	debug_position_tracking(delta)
 
 func handle_gravity(delta):
 	if not is_on_floor():
@@ -88,6 +93,40 @@ func update_distance():
 
 func get_distance_travelled() -> float:
 	return total_distance
+
+func update_terrain_system():
+	var terrain_system = get_tree().get_first_node_in_group("terrain_system")
+	if terrain_system:
+		terrain_system.set_player_position(global_position)
+	else:
+		DebugLogger.log_error("Terrain system not found in scene tree!")
+
+func debug_position_tracking(delta):
+	debug_timer += delta
+	if debug_timer >= 1.0:  # Log every second
+		var terrain_system = get_tree().get_first_node_in_group("terrain_system")
+		if terrain_system:
+			var current_chunk = terrain_system.world_to_chunk(global_position)
+			var terrain_height = terrain_system.get_terrain_height_at_world_position(global_position)
+			var height_diff = global_position.y - terrain_height
+			
+			DebugLogger.log_player("Pos: %s | Chunk: %s | TerrainHeight: %.2f | HeightDiff: %.2f | OnFloor: %s" % [
+				str(global_position), str(current_chunk), terrain_height, height_diff, is_on_floor()
+			])
+			
+			if current_chunk != last_chunk_position:
+				DebugLogger.log_player("CHUNK CHANGED: %s -> %s" % [str(last_chunk_position), str(current_chunk)])
+				last_chunk_position = current_chunk
+			
+			if height_diff < -5.0:
+				DebugLogger.log_error("PLAYER FALLING THROUGH TERRAIN! Height diff: %.2f" % height_diff)
+			
+			if not is_on_floor() and velocity.y < -10.0:
+				DebugLogger.log_warning("Player falling fast! Velocity Y: %.2f" % velocity.y)
+		else:
+			DebugLogger.log_error("Cannot access terrain system for position tracking")
+		
+		debug_timer = 0.0
 
 func set_mouse_captured(captured: bool):
 	mouse_captured = captured
