@@ -74,6 +74,7 @@ func update_debug_info():
 	
 	var debug_text = "TERRAIN:\n"
 	debug_text += "Chunks: %d\n" % terrain_debug.chunks_loaded
+	debug_text += "Queued: %d\n" % terrain_debug.chunks_queued
 	debug_text += "Player Chunk: %s\n" % str(terrain_debug.player_chunk)
 	debug_text += "Render Dist: %d\n" % terrain_debug.render_distance
 	debug_text += "\nVEGETATION:\n"
@@ -218,3 +219,4 @@ func clear_movement_input():
 	Input.action_release("move_right")
 	Input.action_release("move_forward")
 	Input.action_release("move_backward")
+

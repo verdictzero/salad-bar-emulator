@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://jmbf1dn1p1cj" path="res://scripts/GameController.gd" id="5_game"]
 [ext_resource type="Texture2D" uid="uid://ccikx8coccpci" path="res://day.exr" id="6_day"]
 [ext_resource type="Script" uid="uid://bhbe1g2xpatb5" path="res://scripts/GameSettings.gd" id="7_settings"]
-[ext_resource type="Script" path="res://scripts/DebugLogger.gd" id="8_debug"]
+[ext_resource type="Script" uid="uid://d3xoaiv4ynox0" path="res://scripts/DebugLogger.gd" id="8_debug"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4

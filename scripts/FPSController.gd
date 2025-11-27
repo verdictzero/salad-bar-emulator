@@ -5,6 +5,7 @@ class_name FPSController
 @export var sprint_speed: float = 8.0
 @export var jump_velocity: float = 4.5
 @export var sensitivity: float = 0.003
+@export var gamepad_sensitivity: float = 3.0
 @export var bob_freq: float = 2.0
 @export var bob_amp: float = 0.08
 
@@ -26,17 +27,20 @@ func _ready():
 	DebugLogger.log_player("FPS Controller initialized at position: %s" % str(global_position))
 
 func _input(event):
+	# Mouse camera control
 	if event is InputEventMouseMotion and mouse_captured:
 		rotate_y(-event.relative.x * sensitivity)
 		camera_pivot.rotate_x(-event.relative.y * sensitivity)
 		camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, -PI/2, PI/2)
-	
+
+	# Toggle mouse capture
 	if event.is_action_pressed("ui_cancel"):
 		set_mouse_captured(!mouse_captured)
 
 func _physics_process(delta):
 	handle_gravity(delta)
 	handle_jump()
+	handle_gamepad_camera(delta)
 	handle_movement(delta)
 	handle_head_bob(delta)
 	move_and_slide()
@@ -51,6 +55,16 @@ func handle_gravity(delta):
 func handle_jump():
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = jump_velocity
+
+func handle_gamepad_camera(delta):
+	# Gamepad camera control with right stick
+	var camera_x = Input.get_action_strength("camera_right") - Input.get_action_strength("camera_left")
+	var camera_y = Input.get_action_strength("camera_down") - Input.get_action_strength("camera_up")
+
+	if abs(camera_x) > 0.1 or abs(camera_y) > 0.1:
+		rotate_y(-camera_x * gamepad_sensitivity * delta)
+		camera_pivot.rotate_x(-camera_y * gamepad_sensitivity * delta)
+		camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, -PI/2, PI/2)
 
 func handle_movement(delta):
 	var input_dir = Vector2.ZERO

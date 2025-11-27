@@ -8,8 +8,8 @@ class_name VegetationSystem
 @export var bush_density: float = 0.6
 
 @export_group("Tree Settings")
-@export var tree_min_scale: float = 2.0
-@export var tree_max_scale: float = 4.0
+@export var tree_min_scale: float = 6.0
+@export var tree_max_scale: float = 12.0
 
 @export_group("Bush Settings")
 @export var bush_min_scale: float = 0.8
@@ -36,6 +36,7 @@ var update_frequency: float = 1.0
 enum VegetationType { TREE, BUSH }
 
 func _ready():
+	add_to_group("vegetation_system")
 	setup_materials()
 	terrain_system = get_parent().find_child("TerrainSystem")
 	
