@@ -7,6 +7,7 @@ signal back_to_main
 @onready var back_button: Button = $PanelContainer/MarginContainer/VBoxContainer/BackButton
 @onready var reset_button: Button = $PanelContainer/MarginContainer/VBoxContainer/ResetButton
 @onready var listening_label: Label = $ListeningLabel
+@onready var limited_mode_container: VBoxContainer = $PanelContainer/MarginContainer/VBoxContainer/LimitedModeContainer
 
 var is_listening: bool = false
 var current_action: String = ""
@@ -27,14 +28,26 @@ var rebindable_actions = {
 }
 
 var first_button: Button = null
+var limited_gamepad_mode: LimitedGamepadMode = null
+var limited_mode_toggle: CheckButton = null
+var camera_mode_option: OptionButton = null
 
 func _ready():
 	back_button.pressed.connect(_on_back_pressed)
 	reset_button.pressed.connect(_on_reset_pressed)
 	listening_label.hide()
 
+	# Find limited gamepad mode
+	await get_tree().process_frame
+	var limited_nodes = get_tree().get_nodes_in_group("limited_gamepad_mode")
+	if limited_nodes.size() > 0:
+		limited_gamepad_mode = limited_nodes[0]
+
 	# Load saved input mappings
 	load_input_mapping()
+
+	# Create limited mode UI
+	create_limited_mode_ui()
 
 	# Create UI for each action
 	create_bindings_ui()
@@ -47,6 +60,76 @@ func _on_visibility_changed():
 		# Focus first button when menu becomes visible for gamepad navigation
 		await get_tree().process_frame
 		first_button.grab_focus()
+
+func create_limited_mode_ui():
+	if not limited_mode_container:
+		return
+
+	# Clear existing
+	for child in limited_mode_container.get_children():
+		child.queue_free()
+
+	# Title
+	var title = Label.new()
+	title.text = "LIMITED GAMEPAD MODE (D-Pad + 6 Buttons)"
+	title.add_theme_font_size_override("font_size", 18)
+	limited_mode_container.add_child(title)
+
+	# Enable toggle
+	var toggle_hbox = HBoxContainer.new()
+	var toggle_label = Label.new()
+	toggle_label.text = "Enable Limited Mode:"
+	toggle_label.custom_minimum_size.x = 200
+	toggle_hbox.add_child(toggle_label)
+
+	limited_mode_toggle = CheckButton.new()
+	if limited_gamepad_mode:
+		limited_mode_toggle.button_pressed = limited_gamepad_mode.enabled
+	limited_mode_toggle.toggled.connect(_on_limited_mode_toggled)
+	toggle_hbox.add_child(limited_mode_toggle)
+	limited_mode_container.add_child(toggle_hbox)
+
+	# Camera mode selector
+	var camera_hbox = HBoxContainer.new()
+	var camera_label = Label.new()
+	camera_label.text = "Camera Control:"
+	camera_label.custom_minimum_size.x = 200
+	camera_hbox.add_child(camera_label)
+
+	camera_mode_option = OptionButton.new()
+	camera_mode_option.add_item("Tap X/Y to Rotate", 2)  # TAP_ROTATE
+	camera_mode_option.add_item("Hold X + D-Pad", 1)      # HOLD_MODIFIER
+	camera_mode_option.add_item("Auto-Follow Movement", 0) # AUTO_FOLLOW
+
+	if limited_gamepad_mode:
+		camera_mode_option.selected = limited_gamepad_mode.camera_mode
+
+	camera_mode_option.item_selected.connect(_on_camera_mode_selected)
+	camera_hbox.add_child(camera_mode_option)
+	limited_mode_container.add_child(camera_hbox)
+
+	# Info label
+	var info = Label.new()
+	info.text = "D-Pad: Move | A: Jump | B: Sprint | L/R or X/Y: Camera | Start: Menu"
+	info.add_theme_font_size_override("font_size", 14)
+	info.modulate = Color(0.8, 0.8, 0.8, 1.0)
+	limited_mode_container.add_child(info)
+
+	# Separator
+	var separator = HSeparator.new()
+	limited_mode_container.add_child(separator)
+
+func _on_limited_mode_toggled(enabled: bool):
+	if limited_gamepad_mode:
+		limited_gamepad_mode.enabled = enabled
+
+func _on_camera_mode_selected(index: int):
+	if limited_gamepad_mode:
+		# Map option index to camera mode
+		match index:
+			0: limited_gamepad_mode.camera_mode = LimitedGamepadMode.CameraMode.AUTO_FOLLOW
+			1: limited_gamepad_mode.camera_mode = LimitedGamepadMode.CameraMode.HOLD_MODIFIER
+			2: limited_gamepad_mode.camera_mode = LimitedGamepadMode.CameraMode.TAP_ROTATE
 
 func create_bindings_ui():
 	# Clear existing children
