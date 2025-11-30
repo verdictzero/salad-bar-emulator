@@ -8,8 +8,8 @@ class_name VegetationSystem
 @export var bush_density: float = 0.6
 
 @export_group("Tree Settings")
-@export var tree_min_scale: float = 6.0
-@export var tree_max_scale: float = 12.0
+@export var tree_min_scale: float = 10.0
+@export var tree_max_scale: float = 18.0
 
 @export_group("Bush Settings")
 @export var bush_min_scale: float = 0.8
@@ -235,7 +235,7 @@ func create_vegetation_instance(type: VegetationType, rng: RandomNumberGenerator
 	
 	match type:
 		VegetationType.TREE:
-			quad_mesh.size = Vector2(3.0, 4.0)
+			quad_mesh.size = Vector2(7.0, 10.0)
 			quad_mesh.center_offset = Vector3(0, quad_mesh.size.y * 0.5, 0)  # Pivot at bottom
 			mesh_instance.material_override = tree_material
 		VegetationType.BUSH:

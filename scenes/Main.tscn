@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bxoqjkd8nwvxm"]
+[gd_scene load_steps=13 format=3 uid="uid://bxoqjkd8nwvxm"]
 
 [ext_resource type="Script" uid="uid://c8wcliqi6hjxu" path="res://scripts/FPSController.gd" id="1_fps"]
 [ext_resource type="Script" uid="uid://ckhyomhvsnxcy" path="res://scripts/TerrainSystem.gd" id="3_terrain"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://ccikx8coccpci" path="res://day.exr" id="6_day"]
 [ext_resource type="Script" uid="uid://bhbe1g2xpatb5" path="res://scripts/GameSettings.gd" id="7_settings"]
 [ext_resource type="Script" uid="uid://d3xoaiv4ynox0" path="res://scripts/DebugLogger.gd" id="8_debug"]
+[ext_resource type="Script" uid="uid://bhpgkdop7eo10" path="res://scripts/Dither.gd" id="9_dither"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -55,6 +56,8 @@ render_distance = 15
 
 [node name="VegetationSystem" type="Node3D" parent="."]
 script = ExtResource("4_vegetation")
+tree_min_scale = 10.0
+tree_max_scale = 18.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1")
@@ -73,3 +76,6 @@ script = ExtResource("7_settings")
 
 [node name="DebugLogger" type="Node" parent="."]
 script = ExtResource("8_debug")
+
+[node name="Dither" type="CanvasLayer" parent="."]
+script = ExtResource("9_dither")
