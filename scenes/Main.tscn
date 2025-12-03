@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bxoqjkd8nwvxm"]
+[gd_scene load_steps=13 format=3 uid="uid://bxoqjkd8nwvxm"]
 
 [ext_resource type="Script" uid="uid://c8wcliqi6hjxu" path="res://scripts/FPSController.gd" id="1_fps"]
 [ext_resource type="Script" uid="uid://ckhyomhvsnxcy" path="res://scripts/TerrainSystem.gd" id="3_terrain"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" uid="uid://d3xoaiv4ynox0" path="res://scripts/DebugLogger.gd" id="8_debug"]
 [ext_resource type="Script" uid="uid://bhpgkdop7eo10" path="res://scripts/Dither.gd" id="9_dither"]
 [ext_resource type="Script" uid="uid://bv5x4votc1gpi" path="res://scripts/DayNightCycle.gd" id="10_daynight"]
+[ext_resource type="Script" uid="uid://dxruc6ohguh3y" path="res://scripts/WorldOriginShifter.gd" id="11_shifter"]
+[ext_resource type="Script" uid="uid://be17elnbxilvn" path="res://scripts/CloudRing.gd" id="12_clouds"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -56,6 +58,9 @@ environment = SubResource("Environment_1")
 [node name="DayNightCycle" type="Node3D" parent="Environment"]
 script = ExtResource("10_daynight")
 
+[node name="CloudRing" type="Node3D" parent="Environment"]
+script = ExtResource("12_clouds")
+
 [node name="GameController" type="Node" parent="."]
 script = ExtResource("5_game")
 
@@ -67,3 +72,6 @@ script = ExtResource("8_debug")
 
 [node name="Dither" type="CanvasLayer" parent="."]
 script = ExtResource("9_dither")
+
+[node name="WorldOriginShifter" type="Node" parent="."]
+script = ExtResource("11_shifter")

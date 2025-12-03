@@ -32,6 +32,7 @@ var tree_material: StandardMaterial3D
 var bush_material: StandardMaterial3D
 var update_timer: float = 0.0
 var update_frequency: float = 1.0
+var world_offset: Vector3 = Vector3.ZERO  # Cumulative offset from origin shifting
 
 enum VegetationType { TREE, BUSH }
 
@@ -149,9 +150,11 @@ func spawn_vegetation_in_chunk(chunk_pos: Vector2, is_preview: bool = false):
 	var chunk_key = str(chunk_pos)
 	var chunk_vegetation = []
 	var chunk_size = terrain_system.chunk_size if terrain_system else 32
-	
+
+	# Use true world chunk position for seed to ensure consistent vegetation after origin shifts
+	var true_chunk_pos = chunk_pos + Vector2(world_offset.x, world_offset.z) / chunk_size
 	var rng = RandomNumberGenerator.new()
-	rng.seed = hash(chunk_key + "vegetation")
+	rng.seed = hash(str(true_chunk_pos) + "vegetation")
 	
 	if use_clustering:
 		spawn_clustered_vegetation(chunk_pos, chunk_vegetation, rng, is_preview)

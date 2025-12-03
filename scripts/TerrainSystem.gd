@@ -28,6 +28,7 @@ var player_position: Vector3 = Vector3.ZERO
 var last_player_chunk: Vector2 = Vector2.INF
 var update_timer: float = 0.0
 var update_frequency: float = 0.2  # Reduced frequency for better performance
+var world_offset: Vector3 = Vector3.ZERO  # Cumulative offset from origin shifting
 
 # Async chunk generation
 var chunk_generation_queue: Array = []
@@ -320,7 +321,10 @@ func generate_terrain_mesh(chunk_pos: Vector2, lod_level: int) -> ArrayMesh:
 	return mesh
 
 func get_height_at(x: float, z: float) -> float:
-	return noise.get_noise_2d(x, z) * height_scale
+	# Use true world coordinates for consistent terrain regardless of origin shifts
+	var true_x = x + world_offset.x
+	var true_z = z + world_offset.z
+	return noise.get_noise_2d(true_x, true_z) * height_scale
 
 func calculate_normal(x: float, z: float) -> Vector3:
 	var h_left = get_height_at(x - 1, z)

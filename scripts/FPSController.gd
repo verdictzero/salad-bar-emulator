@@ -23,6 +23,7 @@ var limited_gamepad_mode: LimitedGamepadMode = null
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 
 func _ready():
+	add_to_group("player")
 	set_mouse_captured(true)
 	last_position = position
 	DebugLogger.log_player("FPS Controller initialized at position: %s" % str(global_position))

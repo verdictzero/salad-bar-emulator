@@ -9,6 +9,7 @@ class_name DayNightCycle
 @export var orbit_radius: float = 200.0
 @export var sun_size: float = 15.0
 @export var moon_size: float = 8.0
+@export var recenter_interval: float = 2.0  # Recenter sun/moon on player every N seconds
 
 @export_group("Ambient Light")
 @export var day_ambient_color: Color = Color(0.95, 0.95, 1.0)
@@ -51,8 +52,13 @@ var sky_material: ShaderMaterial
 var world_environment: WorldEnvironment
 var environment: Environment
 var camera: Camera3D
+var orbit_center: Vector3 = Vector3.ZERO
+var target_orbit_center: Vector3 = Vector3.ZERO
+var recenter_timer: float = 0.0
+var center_lerp_speed: float = 2.0  # How fast to smoothly move toward player
 
 func _ready():
+	add_to_group("day_night_cycle")
 	create_sky()
 	create_sun()
 	create_moon()
@@ -119,7 +125,7 @@ func create_sun():
 	sun_material.emission_enabled = true
 	sun_material.emission = sun_day_color
 	sun_material.emission_energy_multiplier = 2.0
-	sun_material.render_priority = -100
+	sun_material.render_priority = -200  # Render behind clouds
 	sun_material.disable_fog = true
 	sun_mesh.material_override = sun_material
 	sun_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -141,7 +147,7 @@ func create_moon():
 	mat.emission_enabled = true
 	mat.emission = Color(0.9, 0.9, 1.0)
 	mat.emission_energy_multiplier = 1.5
-	mat.render_priority = -100
+	mat.render_priority = -200  # Render behind clouds
 	mat.disable_fog = true
 	moon_mesh.material_override = mat
 	moon_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -177,28 +183,34 @@ func _process(delta):
 	if time_of_day >= 1.0:
 		time_of_day -= 1.0
 
-	update_celestial_bodies()
+	update_celestial_bodies(delta)
 	update_sky()
 	update_ambient_and_fog()
 	update_night_filter()
 
-func update_celestial_bodies():
-	# Get player position to center the sky around them
-	var player = get_tree().get_first_node_in_group("player")
-	var center = Vector3.ZERO
-	if player:
-		center = player.global_position
-		# Keep sky centered on player
-		sky_mesh.global_position = center
+func update_celestial_bodies(delta: float):
+	# Update target position periodically
+	recenter_timer += delta
+	if recenter_timer >= recenter_interval:
+		recenter_timer = 0.0
+		var player = get_tree().get_first_node_in_group("player")
+		if player:
+			target_orbit_center = player.global_position
+
+	# Smoothly lerp orbit center toward target
+	orbit_center = orbit_center.lerp(target_orbit_center, center_lerp_speed * delta)
+
+	# Keep sky centered on orbit center
+	sky_mesh.global_position = orbit_center
 
 	# Sun angle: 0.25 (sunrise) = horizon east, 0.5 (noon) = top, 0.75 (sunset) = horizon west
 	var sun_angle = (time_of_day - 0.25) * TAU  # TAU = 2*PI
 	var sun_x = cos(sun_angle) * orbit_radius
 	var sun_y = sin(sun_angle) * orbit_radius
-	sun_mesh.global_position = center + Vector3(sun_x, sun_y, 0)
+	sun_mesh.global_position = orbit_center + Vector3(sun_x, sun_y, 0)
 
 	# Moon is opposite the sun
-	moon_mesh.global_position = center + Vector3(-sun_x, -sun_y, 0)
+	moon_mesh.global_position = orbit_center + Vector3(-sun_x, -sun_y, 0)
 
 	# Hide sun/moon when below horizon
 	sun_mesh.visible = sun_y > -sun_size
