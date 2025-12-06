@@ -66,9 +66,10 @@ func setup_materials():
 	tree_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	tree_material.flags_unshaded = true
 	tree_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	tree_material.texture_repeat = false
 	tree_material.no_depth_test = false
 	tree_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
-	
+
 	# Bush material
 	bush_material = StandardMaterial3D.new()
 	var bush_texture = load("res://bush.tga")
@@ -81,6 +82,7 @@ func setup_materials():
 	bush_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	bush_material.flags_unshaded = true
 	bush_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	bush_material.texture_repeat = false
 	bush_material.no_depth_test = false
 	bush_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
 

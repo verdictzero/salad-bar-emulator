@@ -53,7 +53,7 @@ func setup_material():
 shader_type spatial;
 render_mode unshaded, blend_mix, depth_draw_opaque, cull_disabled, fog_disabled;
 
-uniform sampler2D mountain_texture : source_color, filter_nearest;
+uniform sampler2D mountain_texture : source_color, filter_nearest, repeat_disable;
 uniform float fog_opacity : hint_range(0.0, 1.0) = 0.8;
 uniform vec3 fog_color : source_color = vec3(0.85, 0.9, 1.0);
 
