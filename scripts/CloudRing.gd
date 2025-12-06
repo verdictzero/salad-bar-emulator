@@ -35,20 +35,22 @@ func _ready():
 	create_cloud_ring()
 
 func load_cloud_textures():
-	# Load all cloud textures (cloud_1.png, cloud_2.png, etc.)
-	var i = 1
-	while true:
-		var path = "res://cloud_%d.png" % i
+	# Load all cloud textures (big and small clouds)
+	var cloud_paths = [
+		"res://big_cloud_1.png",
+		"res://big_cloud_2.png",
+		"res://small_cloud_1.png",
+		"res://small_cloud_2.png"
+	]
+
+	for path in cloud_paths:
 		if ResourceLoader.exists(path):
 			var texture = load(path)
 			if texture:
 				cloud_sprites.append(texture)
-			i += 1
-		else:
-			break
 
 	if cloud_sprites.is_empty():
-		push_warning("CloudRing: No cloud textures found (expected cloud_1.png, cloud_2.png, etc.)")
+		push_warning("CloudRing: No cloud textures found (expected big_cloud_*.png, small_cloud_*.png)")
 
 func setup_material():
 	cloud_shader = Shader.new()
