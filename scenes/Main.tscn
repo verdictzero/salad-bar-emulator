@@ -1,6 +1,7 @@
-[gd_scene load_steps=15 format=3 uid="uid://bxoqjkd8nwvxm"]
+[gd_scene load_steps=16 format=3 uid="uid://bxoqjkd8nwvxm"]
 
 [ext_resource type="Script" uid="uid://c8wcliqi6hjxu" path="res://scripts/FPSController.gd" id="1_fps"]
+[ext_resource type="Script" path="res://scripts/DebugUI.gd" id="15_debugui"]
 [ext_resource type="Script" uid="uid://ckhyomhvsnxcy" path="res://scripts/TerrainSystem.gd" id="3_terrain"]
 [ext_resource type="Script" uid="uid://3rbcnergj3kh" path="res://scripts/VegetationSystem.gd" id="4_vegetation"]
 [ext_resource type="Script" uid="uid://jmbf1dn1p1cj" path="res://scripts/GameController.gd" id="5_game"]
@@ -83,3 +84,6 @@ script = ExtResource("9_dither")
 
 [node name="WorldOriginShifter" type="Node" parent="."]
 script = ExtResource("11_shifter")
+
+[node name="DebugUI" type="CanvasLayer" parent="."]
+script = ExtResource("15_debugui")
