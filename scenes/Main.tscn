@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bxoqjkd8nwvxm"]
+[gd_scene load_steps=14 format=3 uid="uid://bxoqjkd8nwvxm"]
 
 [ext_resource type="Script" uid="uid://c8wcliqi6hjxu" path="res://scripts/FPSController.gd" id="1_fps"]
 [ext_resource type="Script" uid="uid://ckhyomhvsnxcy" path="res://scripts/TerrainSystem.gd" id="3_terrain"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://bv5x4votc1gpi" path="res://scripts/DayNightCycle.gd" id="10_daynight"]
 [ext_resource type="Script" uid="uid://dxruc6ohguh3y" path="res://scripts/WorldOriginShifter.gd" id="11_shifter"]
 [ext_resource type="Script" uid="uid://be17elnbxilvn" path="res://scripts/CloudRing.gd" id="12_clouds"]
+[ext_resource type="Script" path="res://scripts/MountainRing.gd" id="13_mountains"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -60,6 +61,9 @@ script = ExtResource("10_daynight")
 
 [node name="CloudRing" type="Node3D" parent="Environment"]
 script = ExtResource("12_clouds")
+
+[node name="MountainRing" type="Node3D" parent="Environment"]
+script = ExtResource("13_mountains")
 
 [node name="GameController" type="Node" parent="."]
 script = ExtResource("5_game")

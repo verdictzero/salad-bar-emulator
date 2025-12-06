@@ -48,7 +48,7 @@ func _ready():
 
 	# Apply initial settings
 	apply_all_settings()
-
+	
 func apply_all_settings():
 	apply_terrain_settings()
 	apply_vegetation_settings()
