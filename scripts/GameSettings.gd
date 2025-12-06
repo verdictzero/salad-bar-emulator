@@ -39,7 +39,7 @@ signal settings_changed(setting_name: String, value)
 var terrain_system: TerrainSystem
 var vegetation_system: VegetationSystem
 
-func _ready():
+func _ready():	
 	add_to_group("game_settings")
 	# Find and connect to systems
 	await get_tree().process_frame

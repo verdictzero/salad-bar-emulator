@@ -13,7 +13,7 @@ class_name CloudRing
 @export var cloud_scale_min: float = 200.0
 @export var cloud_scale_max: float = 400.0
 @export var cloud_opacity: float = 0.8
-@export var fog_influence: float = 0.5  # How much fog affects clouds (0-1)
+@export var fog_opacity: float = 0.8
 
 @export_group("Tracking")
 @export var follow_player: bool = true
@@ -27,11 +27,13 @@ var target_ring_center: Vector3 = Vector3.ZERO
 var recenter_timer: float = 0.0
 var ring_rotation: float = 0.0
 var center_lerp_speed: float = 2.0  # How fast to smoothly move toward player
+var environment: Environment
 
 func _ready():
 	add_to_group("cloud_ring")
 	load_cloud_textures()
 	setup_material()
+	find_environment()
 	create_cloud_ring()
 
 func load_cloud_textures():
@@ -56,12 +58,12 @@ func setup_material():
 	cloud_shader = Shader.new()
 	cloud_shader.code = """
 shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_lambert, specular_disabled, fog_disabled;
+render_mode unshaded, blend_mix, depth_draw_opaque, cull_disabled, fog_disabled;
 
 uniform sampler2D cloud_texture : source_color, filter_nearest;
 uniform float opacity : hint_range(0.0, 1.0) = 0.8;
-uniform float fog_influence : hint_range(0.0, 1.0) = 0.5;
-uniform vec3 fog_color : source_color = vec3(0.9, 0.95, 1.0);
+uniform float fog_opacity : hint_range(0.0, 1.0) = 0.8;
+uniform vec3 fog_color : source_color = vec3(0.85, 0.9, 1.0);
 
 varying float vertex_distance;
 
@@ -89,19 +91,14 @@ void vertex() {
 void fragment() {
 	vec4 tex = texture(cloud_texture, UV);
 
-	// Calculate fog factor based on distance (exponential fog)
+	// Custom fog based on distance
 	float fog_factor = 1.0 - exp(-vertex_distance * 0.002);
-	fog_factor = clamp(fog_factor * fog_influence, 0.0, 1.0);
+	fog_factor = clamp(fog_factor * fog_opacity, 0.0, 1.0);
 
-	// Mix texture with fog color
 	ALBEDO = mix(tex.rgb, fog_color, fog_factor);
 	ALPHA = tex.a * opacity;
 }
 
-void light() {
-	// Accept ambient light contribution
-	DIFFUSE_LIGHT += ATTENUATION * LIGHT_COLOR * ALBEDO;
-}
 """
 
 func create_cloud_ring():
@@ -152,8 +149,7 @@ func create_cloud_instance(rng: RandomNumberGenerator) -> MeshInstance3D:
 	mat.shader = cloud_shader
 	mat.set_shader_parameter("cloud_texture", texture)
 	mat.set_shader_parameter("opacity", cloud_opacity)
-	mat.set_shader_parameter("fog_influence", fog_influence)
-	mat.render_priority = 0  # Render in front of sun/moon
+	mat.set_shader_parameter("fog_opacity", fog_opacity)
 	mesh_instance.material_override = mat
 
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -190,9 +186,24 @@ func _process(delta):
 	# Smoothly lerp ring center toward target
 	ring_center = ring_center.lerp(target_ring_center, center_lerp_speed * delta)
 
+	# Sync fog color with environment
+	if environment:
+		var fog_color = environment.fog_light_color
+		for cloud in cloud_instances:
+			var mat = cloud.material_override as ShaderMaterial
+			if mat:
+				mat.set_shader_parameter("fog_color", fog_color)
+
 	# Update all cloud positions
 	for cloud in cloud_instances:
 		update_cloud_position(cloud)
+
+func find_environment():
+	var world_env = get_tree().get_first_node_in_group("world_environment")
+	if not world_env:
+		world_env = get_parent().get_parent().find_child("WorldEnvironment")
+	if world_env:
+		environment = world_env.environment
 
 func set_ring_center(center: Vector3):
 	ring_center = Vector3(center.x, 0, center.z)

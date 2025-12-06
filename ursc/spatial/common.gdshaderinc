@@ -2,6 +2,11 @@
 // simply uncomment the following line:
 // #define USE_ENVIRONMENT_FOG
 
+// Force everything to be unlit
+#if !defined(UNSHADED)
+	#define UNSHADED
+#endif
+
 // Render mode
 render_mode
 
